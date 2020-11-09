@@ -57,6 +57,10 @@ function (file)
 {
 	dump(functions(),file)
 }
+et <-
+structure(function (v) 
+.approxfun(x, y, v, method, yleft, yright, f, na.rm), class = c("ecdf", 
+"stepfun", "function"), call = quote(ecdf(triangle(100)$y)))
 frown <-
 function ( n,
            mainRadius  = 1,
@@ -137,6 +141,17 @@ function()
 				"jointSample"
 		]
 }
+myCdf <-
+function (x) 
+{
+	sx = sort(x)
+	rl = rle(sx)
+	l  = rl$lengths
+	ll = length(l)
+ 	myX = rep(rl$values, l)
+	myY = cumsum(rep(rep(1,ll),l))
+	list( x = myX, y = myY )
+}
 normal <-
 function (n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) 
 {
@@ -157,6 +172,68 @@ function (n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1)
 	class(me) <- append(class(me), "jointSample")
 	return(me)
 }
+plot.jointSample <-
+function (x, y = NULL, type = "p", xlim = NULL, ylim = NULL, 
+    log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL, 
+    ann = par("ann"), axes = TRUE, frame.plot = axes, panel.first = NULL, 
+    panel.last = NULL, asp = NA, xgap.axis = NA, ygap.axis = NA, 
+    pch=20, cex=0.1, all=F, ...) 
+{
+	if(all)
+	{
+		plot.default(
+				 x           = x, 
+				 y           = y, 
+				 type        = type, 
+				 xlim        = xlim, 
+				 ylim        = ylim, 
+    				 log         = log, 
+				 main        = main, 
+				 sub         = sub, 
+				 xlab        = xlab, 
+				 ylab        = ylab, 
+    				 ann         = ann, 
+				 axes        = axes, 
+				 frame.plot  = frame.plot, 
+				 panel.first = panel.first, 
+    				 panel.last  = panel.last, 
+				 asp         = asp, 
+				 xgap.axis   = xgap.axis, 
+				 ygap.axis   = ygap.axis, 
+		      	 pch         = 20, 
+				 cex         = 0.1
+				)
+		tmpY = myCdf(x$y)
+		plot(list(x = tmpY$y, y = tmpY$x),pch=20,cex=.1)
+		plot(myCdf(x$x),pch=20,cex=.1)
+		plot(copula(x))
+	}
+	else
+	{
+		plot.default(
+				 x           = x, 
+				 y           = y, 
+				 type        = type, 
+				 xlim        = xlim, 
+				 ylim        = ylim, 
+    				 log         = log, 
+				 main        = main, 
+				 sub         = sub, 
+				 xlab        = xlab, 
+				 ylab        = ylab, 
+    				 ann         = ann, 
+				 axes        = axes, 
+				 frame.plot  = frame.plot, 
+				 panel.first = panel.first, 
+    				 panel.last  = panel.last, 
+				 asp         = asp, 
+				 xgap.axis   = xgap.axis, 
+				 ygap.axis   = ygap.axis, 
+		      	 pch         = 20, 
+				 cex         = 0.1
+				)
+	}
+}
 print.jointSample <-
 function (x, ...) 
 {
@@ -169,12 +246,18 @@ function (cop, sample)
 {
 	size = length(cop$x)
 	ss = lapply(sample, sort)
+	sCopX = ss$x[cop$x * (size + 1)]
+	sCopY = ss$x[cop$y * (size + 1)]
 
 	me = list(
-		      x = ss$x[cop$x * (size + 1)], 
-		      y = ss$y[cop$y * (size + 1)]
+		      x   = sCopX, 
+		      y   = sCopY,
+			lx  = length(sCopX),
+			ly  = length(sCopY),
+			ss  = ss,
+			cop = cop
 		      )
-	
+
 	class(me) <- append(class(me), "jointSample")
 	return(me)
 }
@@ -220,8 +303,28 @@ function (
 square <-
 function (n) 
 {
-	list(
-		 x = runif(2 * n),
-		 y = runif(3 * n)
-		 )
+	me = list(
+		    x = runif( n),
+	          y = runif( n)
+		    )
+
+      class(me) <- append(class(me), "jointSample")
+      return(me)
 }
+triangle <-
+function (n, rev = F) 
+{
+	y = runif( n)
+
+	me = list(
+		    x = y/2 + runif( n) * (1 - y),
+	          y = y
+		    )
+
+      class(me) <- append(class(me), "jointSample")
+      return(me)
+}
+tt <-
+structure(function (v) 
+.approxfun(x, y, v, method, yleft, yright, f, na.rm), class = c("ecdf", 
+"stepfun", "function"), call = quote(ecdf(sort(x$y))))
