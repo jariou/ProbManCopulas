@@ -203,13 +203,25 @@ function (x, y = NULL, type = "p", xlim = NULL, ylim = NULL,
 		      	 pch         = 20, 
 				 cex         = 0.1
 				)
+
 		tmpY = myCdf(x$y)
-		plot(list(x = tmpY$y, y = tmpY$x),pch=20,cex=.1)
-		plot(myCdf(x$x),pch=20,cex=.1)
+
+		plot(
+			list(x = tmpY$y, y = tmpY$x),
+			pch = 20,
+			cex = 0.1
+			)
+		plot(
+			myCdf(x$x),
+			pch = 20,
+			cex = 0.1
+			)
+		print("Done with the 3 easy ones")
 		plot(copula(x))
 	}
 	else
 	{
+		print("Entering the other  path")
 		plot.default(
 				 x           = x, 
 				 y           = y, 
@@ -324,7 +336,3 @@ function (n, rev = F)
       class(me) <- append(class(me), "jointSample")
       return(me)
 }
-tt <-
-structure(function (v) 
-.approxfun(x, y, v, method, yleft, yright, f, na.rm), class = c("ecdf", 
-"stepfun", "function"), call = quote(ecdf(sort(x$y))))
