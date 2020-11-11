@@ -1,338 +1,384 @@
+##################################################
+# Simple simulation models                       #
+##################################################
 ball <-
-function (n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) 
-{
-	rPos  = sqrt(
-			     runif(n) * 
-			     (r^2 - hole^2) + 
-			     hole^2
-			     )
+function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
+   radius_pos  <- sqrt(
+                        runif(n) *
+                        (r^2 - hole^2) +
+                        hole^2
+                        )
 
-	theta = 2 * (from + runif(n) * (to - from)) * pi
-	X     = rPos * cos(theta)
-	Y     = rPos * sin(theta)
+   theta <- 2 * (from + runif(n) * (to - from)) * pi
+   x_pos     <- radius_pos * cos(theta)
+   y_pos     <- radius_pos * sin(theta)
 
-	me = list(
-			  x = X + x0, 
-			  y = Y + y0
-			  )
+   me <- list(
+           x = x_pos + x0,
+           y = y_pos + y0
+           )
 
-	class(me) <- append(class(me), "jointSample")
-	return(me)
+   class(me) <- append(class(me), "jointSample")
+   return(me)
 }
+
+##################################################
 circle <-
-function (n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) 
-{
-	theta = 2*(from + runif(n) *(to - from)) * pi
-	X     = r * cos(theta)
-	Y     = r * sin(theta)
+function(n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) {
+   theta <- 2 * (from + runif(n) * (to - from)) * pi
+   x_pos     <- r * cos(theta)
+   y_pos     <- r * sin(theta)
 
-	me    = list(
-				 x = X + x0, 
-				 y = Y + y0
-				 )
+   me    <- list(
+                   x = x_pos + x0,
+                   y = y_pos + y0
+                   )
 
-	class(me) <- append(class(me), "jointSample")
-	return(me)
+   class(me) <- append(class(me), "jointSample")
+   return(me)
 }
-copula <-
-function (js) 
-{
-	size = length(js$x) 	
 
-	me = lapply(
-		    	lapply(
-			    		lapply(js, rank), 
-				    	"[", 
-					    lapply(js,order)$x 
-    					),
-	    		function(t){t/(size+1)}
-		    	)
+##################################################
+square <-
+function(n) {
+   me <- list(
+              x = runif(n),
+              y = runif(n)
+              )
 
-	class(me) <- append(class(me), "jointSample")
-	class(me) <- append(class(me), "copula")
-	return(me) 
+      class(me) <- append(class(me), "jointSample")
+      return(me)
 }
-dump.functions <-
-function (file) 
-{
-	dump(functions(),file)
+
+##################################################
+triangle <-
+function(n, rev = F) {
+   y  <- runif(n)
+
+   me  <- list(
+               x = y / 2 + runif(n) * (1 - y),
+               y = y
+               )
+
+      class(me) <- append(class(me), "jointSample")
+      return(me)
 }
-et <-
-structure(function (v) 
-.approxfun(x, y, v, method, yleft, yright, f, na.rm), class = c("ecdf", 
-"stepfun", "function"), call = quote(ecdf(triangle(100)$y)))
+
+##################################################
+smile <-
+function(
+         n,
+         main_radius  = 1,
+         eye_radius   = 0.25,
+         mouth_radius = 0.7,
+         mouth_start  = 0.55,
+         mouth_end    = 0.95
+         ) {
+   total_length  <- main_radius +
+                    2 * eye_radius +
+                    mouth_radius * (mouth_end - mouth_start)
+
+   mouth_count  <- ceiling(
+                           n * mouth_radius * (mouth_end - mouth_start)
+                           /
+                           totalLength
+                           )
+   eye_count    <- ceiling(n * eye_radius / total_length)
+   main_count   <- n - mouth_count - 2 * eye_count
+
+   main        <- circle(main_count, main_radius)
+   left_eye     <- circle(eye_count, eye_radius, -0.4, 0.4)
+   right_eye    <- circle(eye_count, eye_radius,  0.4, 0.4)
+
+   mouth       <- circle(
+                         mouth_count,
+                         mouth_radius,
+                         0,
+                         0,
+                         mouth_start,
+                         mouth_end
+                         )
+
+   me  <-   list(
+                 x = c(main$x, left_eye$x, right_eye$x, mouth$x),
+                 y = c(main$y, left_eye$y, right_eye$y, mouth$y)
+                 )
+
+   class(me) <- append(class(me), "jointSample")
+   return(me)
+}
+
+##################################################
 frown <-
-function ( n,
-           mainRadius  = 1,
-           eyeRadius   = 0.25,
-           mouthRadius = 0.7,
-           mouthStart  = 0.05,
-           mouthEnd    = 0.45
-           ) 
-{
-        totalLength = mainRadius +
-                      2 * eyeRadius +
-                      mouthRadius * (mouthEnd - mouthStart)
-  
-        mouthCount = ceiling(n * mouthRadius * (mouthEnd - mouthStart) / totalLength)
-        eyeCount   = ceiling(n * eyeRadius / totalLength)
-        mainCount  = n - mouthCount - 2 * eyeCount
+function(n,
+         main_radius  = 1,
+         eye_radius   = 0.25,
+         mouth_radius = 0.7,
+         mouth_start  = 0.05,
+         mouth_end    = 0.45
+         ) {
+        total_length <- main_radius +
+                      2 * eye_radius +
+                      mouth_radius * (mouth_end - mouth_start)
+        mouth_count <- ceiling(n * mouth_radius * (mouth_end - mouth_start)
+                     / total_length)
+        eye_count   <- ceiling(n * eye_radius / total_length)
+        main_count  <- n - mouth_count - 2 * eye_count
 
-        main       = circle(mainCount, mainRadius)
-        leftEye    = circle(eyeCount, eyeRadius, -0.4, 0.4)
-        rightEye   = circle(eyeCount, eyeRadius,  0.4, 0.4)
+        main       <- circle(main_count, main_radius)
+        left_eye    <- circle(eye_count, eye_radius, -0.4, 0.4)
+        right_eye   <- circle(eye_count, eye_radius,  0.4, 0.4)
 
-        mouth      = circle( 
-							mouthCount, 
-                            mouthRadius, 
-                            0, 
-                            -0.8, 
-                            mouthStart , 
-                            mouthEnd
-                            )
+        mouth      <- circle(
+                             mouth_count,
+                             mouth_radius,
+                             0,
+                             -0.8,
+                             mouthStart,
+                             mouthEnd
+                             )
 
-        me     = list(
-                      x = c(main$x, leftEye$x, rightEye$x, mouth$x),
-                      y = c(main$y, leftEye$y, rightEye$y, mouth$y)
+        me     <- list(
+                      x = c(main$x, left_eye$x, right_eye$x, mouth$x),
+                      y = c(main$y, left_eye$y, right_eye$y, mouth$y)
                       )
 
-    	class(me) <- append(class(me), "jointSample")
-		return(me)
+       class(me) <- append(class(me), "jointSample")
+      return(me)
 }
+
+
+##################################################
+copula <-
+function(js) {
+   size <- length(js$x)
+
+   me <- lapply(
+             lapply(
+                   lapply(js, rank),
+                   "[",
+                   lapply(js, order)$x
+                   ),
+             function(t) {
+                           t / (size + 1)
+                           }
+             )
+
+   class(me) <- append(class(me), "jointSample")
+   class(me) <- append(class(me), "copula")
+   return(me)
+}
+
+
+##################################################
+dump.functions <-
+function(file) {
+   dump(functions(), file)
+}
+
+
+##################################################
+# Return a list of functions
 functions <-
-function()
-{
-	objs = objects(envir = globalenv() )
+function() {
+   objs  <- objects(envir = globalenv())
 
-	objs[
-		 unlist(
-			    lapply(
-					   lapply(
-						      lapply(
-								     objs,
-									 function(t)parse(text=t)
-									 ),
-							   eval),
-						typeof
-						)
-				)
-				==
-				"closure"
-		]
+   objs[
+       unlist(
+             lapply(
+                  lapply(
+                        lapply(
+                             objs,
+                            function(t)parse(text = t)
+                            ),
+                        eval),
+                  typeof
+                  )
+            )
+            ==
+            "closure"
+      ]
 }
-jointSamples <-
-function()
-{
-	objs = objects(envir = globalenv() )
 
-	objs[
-		 unlist(
-			    lapply(
-					   lapply(
-						      lapply(
-								     objs,
-									 function(t)parse(text=t)
-									 ),
-							   eval),
-						class
-						)
-				)
-				==
-				"jointSample"
-		]
+##################################################
+# List all jointSample objects
+joint_samples <-
+function() {
+   objs  <- objects(envir = globalenv())
+
+   objs[
+       unlist(
+             lapply(
+                  lapply(
+                        lapply(
+                             objs,
+                            function(t)parse(text = t)
+                            ),
+                        eval),
+                  class
+                  )
+            )
+            ==
+            "jointSample"
+      ]
 }
-myCdf <-
-function (x) 
-{
-	sx = sort(x)
-	rl = rle(sx)
-	l  = rl$lengths
-	ll = length(l)
- 	myX = rep(rl$values, l)
-	myY = cumsum(rep(rep(1,ll),l))
-	list( x = myX, y = myY )
+
+##################################################
+# Simpleimplementation of empirical cdf
+my_cdf <-
+function(x) {
+   sx  <- sort(x)
+   rl  <- rle(sx)
+   l   <- rl$lengths
+   ll  <- length(l)
+   my_x  <- rep(rl$values, l)
+   my_y  <- cumsum(rep(rep(1, ll), l))
+   list(x = my_x, y = my_y)
 }
+
+##################################################
+# Simulate a joint normal distribution
 normal <-
-function (n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) 
-{
-	rPos  = sqrt(
-			  runif(n) * 
-			  (r^2 - hole^2) + 
-			  hole^2
-			)
-	theta = 2 * (from + runif(n) *(to - from)) * pi
-	X     = rPos * cos(theta)
-	Y     = rPos * sin(theta)
+function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
+   r_pos   <- sqrt(
+                  runif(n) *
+                  (r^2 - hole^2) +
+                  hole^2
+                  )
+   theta  <- 2 * (from + runif(n) * (to - from)) * pi
+   x      <- r_pos * cos(theta)
+   y      <- r_pos * sin(theta)
 
-	me = list(
-			  x = X + x0, 
-			  y = Y + y0
-			  )
+   me  <- list(
+           x = x + x0,
+           y = y + y0
+           )
 
-	class(me) <- append(class(me), "jointSample")
-	return(me)
+   class(me) <- append(class(me), "jointSample")
+   return(me)
 }
+
+##################################################
+# Plot a joint sample
 plot.jointSample <-
-function (x, y = NULL, type = "p", xlim = NULL, ylim = NULL, 
-    log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL, 
-    ann = par("ann"), axes = TRUE, frame.plot = axes, panel.first = NULL, 
-    panel.last = NULL, asp = NA, xgap.axis = NA, ygap.axis = NA, 
-    pch=20, cex=0.1, all=F, ...) 
-{
-	if(all)
-	{
-		plot.default(
-				 x           = x, 
-				 y           = y, 
-				 type        = type, 
-				 xlim        = xlim, 
-				 ylim        = ylim, 
-    				 log         = log, 
-				 main        = main, 
-				 sub         = sub, 
-				 xlab        = xlab, 
-				 ylab        = ylab, 
-    				 ann         = ann, 
-				 axes        = axes, 
-				 frame.plot  = frame.plot, 
-				 panel.first = panel.first, 
-    				 panel.last  = panel.last, 
-				 asp         = asp, 
-				 xgap.axis   = xgap.axis, 
-				 ygap.axis   = ygap.axis, 
-		      	 pch         = 20, 
-				 cex         = 0.1
-				)
+function(
+         x,
+         y           = NULL,
+         type        = "p",
+         xlim        = NULL,
+         ylim        = NULL,
+         log         = "",
+         main        = NULL,
+         sub         = NULL,
+         xlab        = NULL,
+         ylab        = NULL,
+         ann         = par("ann"),
+         axes        = TRUE,
+         frame.plot  = axes,
+         panel.first = NULL,
+         panel.last  = NULL,
+         asp         = NA,
+         xgap.axis   = NA,
+         ygap.axis   = NA,
+         pch         = 20,
+         cex         = 0.1,
+         all         = F,
+         ...
+         ) {
+   if (all) {
+      plot.default(
+                   x           = x,
+                   y           = y,
+                   type        = type,
+                   xlim        = xlim,
+                   ylim        = ylim,
+                   log         = log,
+                   main        = main,
+                   sub         = sub,
+                   xlab        = xlab,
+                   ylab        = ylab,
+                   ann         = ann,
+                   axes        = axes,
+                   frame.plot  = frame.plot,
+                   panel.first = panel.first,
+                   panel.last  = panel.last,
+                   asp         = asp,
+                   xgap.axis   = xgap.axis,
+                   ygap.axis   = ygap.axis,
+                   pch         = 20,
+                   cex         = 0.1
+                  )
 
-		tmpY = myCdf(x$y)
+      tmp_y <- my_cdf(x$y)
 
-		plot(
-			list(x = tmpY$y, y = tmpY$x),
-			pch = 20,
-			cex = 0.1
-			)
-		plot(
-			myCdf(x$x),
-			pch = 20,
-			cex = 0.1
-			)
-		print("Done with the 3 easy ones")
-		plot(copula(x))
-	}
-	else
-	{
-		print("Entering the other  path")
-		plot.default(
-				 x           = x, 
-				 y           = y, 
-				 type        = type, 
-				 xlim        = xlim, 
-				 ylim        = ylim, 
-    				 log         = log, 
-				 main        = main, 
-				 sub         = sub, 
-				 xlab        = xlab, 
-				 ylab        = ylab, 
-    				 ann         = ann, 
-				 axes        = axes, 
-				 frame.plot  = frame.plot, 
-				 panel.first = panel.first, 
-    				 panel.last  = panel.last, 
-				 asp         = asp, 
-				 xgap.axis   = xgap.axis, 
-				 ygap.axis   = ygap.axis, 
-		      	 pch         = 20, 
-				 cex         = 0.1
-				)
-	}
+      plot(
+           list(x = tmp_y$y, y = tmp_y$x),
+           pch = 20,
+           cex = 0.1
+           )
+      plot(
+           my_cdf(x$x),
+           pch = 20,
+           cex = 0.1
+           )
+      print("Done with the 3 easy ones")
+      plot(copula(x))
+   }
+   else {
+      print("Entering the other  path")
+      plot.default(
+                   x           = x,
+                   y           = y,
+                   type        = type,
+                   xlim        = xlim,
+                   ylim        = ylim,
+                   log         = log,
+                   main        = main,
+                   sub         = sub,
+                   xlab        = xlab,
+                   ylab        = ylab,
+                   ann         = ann,
+                   axes        = axes,
+                   frame.plot  = frame.plot,
+                   panel.first = panel.first,
+                   panel.last  = panel.last,
+                   asp         = asp,
+                   xgap.axis   = xgap.axis,
+                   ygap.axis   = ygap.axis,
+                   pch         = 20,
+                   cex         = 0.1
+                  )
+   }
 }
+
+##################################################
+# Print method for the jointSample type
 print.jointSample <-
-function (x, ...) 
-{
+function(x, ...) {
     cat("Joint Sample\n")
     NextMethod("print", x)
     invisible(x)
 }
-randCopula <-
-function (cop, sample) 
-{
-	size = length(cop$x)
-	ss = lapply(sample, sort)
-	sCopX = ss$x[cop$x * (size + 1)]
-	sCopY = ss$x[cop$y * (size + 1)]
 
-	me = list(
-		      x   = sCopX, 
-		      y   = sCopY,
-			lx  = length(sCopX),
-			ly  = length(sCopY),
-			ss  = ss,
-			cop = cop
-		      )
+##################################################
+# Simulate using a copula
+rand_copula <-
+function(cop, sample) {
+   size    <- length(cop$x)
+   ss      <- lapply(sample, sort)
+   s_cop_x <- ss$x[cop$x * (size + 1)]
+   s_cop_y <- ss$x[cop$y * (size + 1)]
 
-	class(me) <- append(class(me), "jointSample")
-	return(me)
+   me  <- list(
+               x   = s_cop_x,
+               y   = s_cop_y,
+               lx  = length(s_cop_x),
+               ly  = length(s_cop_y),
+               ss  = ss,
+               cop = cop
+               )
+
+   class(me) <- append(class(me), "jointSample")
+   return(me)
 }
-smile <-
-function ( 
-	      n,
-	      mainRadius  = 1,
-	      eyeRadius   = 0.25,
-	      mouthRadius = 0.7,
-     	  mouthStart  = 0.55,
-	      mouthEnd    = 0.95
- 	      ) 
-{
-	totalLength = mainRadius +
-	     		  2 * eyeRadius +
-		          mouthRadius * (mouthEnd - mouthStart)
-  
-	mouthCount = ceiling(n * mouthRadius * (mouthEnd - mouthStart) / totalLength)
-	eyeCount   = ceiling(n * eyeRadius / totalLength)
-	mainCount  = n - mouthCount - 2 * eyeCount
 
-	main       = circle(mainCount, mainRadius)
-	leftEye    = circle(eyeCount, eyeRadius, -0.4, 0.4)
-	rightEye   = circle(eyeCount, eyeRadius,  0.4, 0.4)
-
-	mouth      = circle(
-		                mouthCount, 
-				        mouthRadius, 
-                        0, 
-                        0, 
-                        mouthStart , 
-                        mouthEnd
-                        )
-
-	me =   list(
-        		 x = c(main$x, leftEye$x, rightEye$x, mouth$x),
-       	         y = c(main$y, leftEye$y, rightEye$y, mouth$y)
-	          	 )
-
-	class(me) <- append(class(me), "jointSample")
-	return(me)
-}
-square <-
-function (n) 
-{
-	me = list(
-		    x = runif( n),
-	          y = runif( n)
-		    )
-
-      class(me) <- append(class(me), "jointSample")
-      return(me)
-}
-triangle <-
-function (n, rev = F) 
-{
-	y = runif( n)
-
-	me = list(
-		    x = y/2 + runif( n) * (1 - y),
-	          y = y
-		    )
-
-      class(me) <- append(class(me), "jointSample")
-      return(me)
-}
