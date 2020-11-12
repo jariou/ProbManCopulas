@@ -26,13 +26,13 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
 circle <-
 function(n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) {
    theta <- 2 * (from + runif(n) * (to - from)) * pi
-   x_pos     <- r * cos(theta)
-   y_pos     <- r * sin(theta)
+   x_pos <- r * cos(theta)
+   y_pos <- r * sin(theta)
 
    me    <- list(
-                   x = x_pos + x0,
-                   y = y_pos + y0
-                   )
+                 x = x_pos + x0,
+                 y = y_pos + y0
+                 )
 
    class(me) <- append(class(me), "jointSample")
    return(me)
@@ -81,7 +81,7 @@ function(
    mouth_count  <- ceiling(
                            n * mouth_radius * (mouth_end - mouth_start)
                            /
-                           totalLength
+                           total_length
                            )
    eye_count    <- ceiling(n * eye_radius / total_length)
    main_count   <- n - mouth_count - 2 * eye_count
@@ -117,34 +117,37 @@ function(n,
          mouth_start  = 0.05,
          mouth_end    = 0.45
          ) {
-        total_length <- main_radius +
-                      2 * eye_radius +
-                      mouth_radius * (mouth_end - mouth_start)
-        mouth_count <- ceiling(n * mouth_radius * (mouth_end - mouth_start)
-                     / total_length)
-        eye_count   <- ceiling(n * eye_radius / total_length)
-        main_count  <- n - mouth_count - 2 * eye_count
+   total_length <- main_radius +
+                  2 * eye_radius +
+                  mouth_radius * (mouth_end - mouth_start)
+   mouth_count  <- ceiling(
+                           n * mouth_radius *
+                           (mouth_end - mouth_start)
+                           /
+                           total_length
+                           )
+   eye_count    <- ceiling(n * eye_radius / total_length)
+   main_count   <- n - mouth_count - 2 * eye_count
 
-        main       <- circle(main_count, main_radius)
-        left_eye    <- circle(eye_count, eye_radius, -0.4, 0.4)
-        right_eye   <- circle(eye_count, eye_radius,  0.4, 0.4)
+   main         <- circle(main_count, main_radius)
+   left_eye     <- circle(eye_count, eye_radius, -0.4, 0.4)
+   right_eye    <- circle(eye_count, eye_radius,  0.4, 0.4)
 
-        mouth      <- circle(
-                             mouth_count,
-                             mouth_radius,
-                             0,
-                             -0.8,
-                             mouthStart,
-                             mouthEnd
-                             )
+   mouth        <- circle(
+                          mouth_count,
+                          mouth_radius,
+                          0,
+                          -0.8,
+                          mouthStart,
+                          mouthEnd
+                          )
+   me     <- list(
+                  x = c(main$x, left_eye$x, right_eye$x, mouth$x),
+                  y = c(main$y, left_eye$y, right_eye$y, mouth$y)
+                  )
 
-        me     <- list(
-                      x = c(main$x, left_eye$x, right_eye$x, mouth$x),
-                      y = c(main$y, left_eye$y, right_eye$y, mouth$y)
-                      )
-
-       class(me) <- append(class(me), "jointSample")
-      return(me)
+   class(me) <- append(class(me), "jointSample")
+   return(me)
 }
 
 
@@ -381,4 +384,3 @@ function(cop, sample) {
    class(me) <- append(class(me), "jointSample")
    return(me)
 }
-
