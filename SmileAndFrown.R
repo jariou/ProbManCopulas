@@ -153,19 +153,23 @@ function(n,
 
 ##################################################
 copula <-
-function(js) {
-   size <- length(js$x)
+function(joint_sample) {
+   size <- length(joint_sample$x)
+   print(paste("----> size is ",size))
 
-   me <- lapply(
-             lapply(
-                   lapply(js, rank),
+   str(joint_sample)
+   tmp_0 <- lapply(joint_sample, rank)
+   tmp_1 <- lapply(
+                   tmp_0,
                    "[",
-                   lapply(js, order)$x
-                   ),
-             function(t) {
-                           t / (size + 1)
-                           }
-             )
+                   lapply(joint_sample, order)$x
+                   )
+   me <- lapply(
+                tmp_1,
+                function(t) {
+                             t / (size + 1)
+                             }
+                )
 
    class(me) <- append(class(me), "jointSample")
    class(me) <- append(class(me), "copula")
@@ -210,20 +214,21 @@ function() {
    objs  <- objects(envir = globalenv())
 
    objs[
-       unlist(
-             lapply(
-                  lapply(
-                        lapply(
-                             objs,
-                            function(t)parse(text = t)
-                            ),
-                        eval),
-                  class
-                  )
-            )
-            ==
-            "jointSample"
-      ]
+        unlist(
+               lapply(
+                      lapply(
+                             lapply(
+                                    objs,
+                                    function(t)parse(text = t)
+                                    ),
+                             eval
+                             ),
+                      class
+                     )
+              )
+              ==
+              "jointSample"
+        ]
 }
 
 ##################################################
@@ -232,12 +237,17 @@ my_cdf <-
 function(x) {
    sx  <- sort(x)
    rl  <- rle(sx)
+
    l   <- rl$lengths
    ll  <- length(l)
+
    my_x  <- rep(rl$values, l)
    my_y  <- cumsum(rep(rep(1, ll), l))
+
    list(x = my_x, y = my_y)
 }
+
+
 
 ##################################################
 # Simulate a joint normal distribution
@@ -266,91 +276,52 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
 plot.jointSample <-
 function(
          x,
-         y           = NULL,
-         type        = "p",
-         xlim        = NULL,
-         ylim        = NULL,
-         log         = "",
-         main        = NULL,
-         sub         = NULL,
-         xlab        = NULL,
-         ylab        = NULL,
-         ann         = par("ann"),
-         axes        = TRUE,
-         frame.plot  = axes,
-         panel.first = NULL,
-         panel.last  = NULL,
-         asp         = NA,
-         xgap.axis   = NA,
-         ygap.axis   = NA,
          pch         = 20,
          cex         = 0.1,
          all         = F,
          ...
          ) {
    if (all) {
+      # Setup the 4 plot canvases
+      par(mfrow = c(2, 2), mar = c(0, 0, 0, 0), mai = c(0, 0, 0, 0))
+
+      # Plain X-Y plot of the sample
       plot.default(
                    x           = x,
-                   y           = y,
-                   type        = type,
-                   xlim        = xlim,
-                   ylim        = ylim,
-                   log         = log,
-                   main        = main,
-                   sub         = sub,
-                   xlab        = xlab,
-                   ylab        = ylab,
-                   ann         = ann,
-                   axes        = axes,
-                   frame.plot  = frame.plot,
-                   panel.first = panel.first,
-                   panel.last  = panel.last,
-                   asp         = asp,
-                   xgap.axis   = xgap.axis,
-                   ygap.axis   = ygap.axis,
                    pch         = 20,
-                   cex         = 0.1
+                   cex         = 0.1,
+                   ...
                   )
 
+      # Plot flipped CDF of Y marginal
       tmp_y <- my_cdf(x$y)
-
       plot(
            list(x = tmp_y$y, y = tmp_y$x),
            pch = 20,
-           cex = 0.1
+           cex = 0.1,
+           ...
            )
+
+      # Plot CDF of X marginal
       plot(
            my_cdf(x$x),
            pch = 20,
-           cex = 0.1
+           cex = 0.1,
+           ...
            )
+
       print("Done with the 3 easy ones")
+
+      # Plot of the copula
       plot(copula(x))
    }
    else {
-      print("Entering the other  path")
       plot.default(
                    x           = x,
-                   y           = y,
-                   type        = type,
-                   xlim        = xlim,
-                   ylim        = ylim,
-                   log         = log,
-                   main        = main,
-                   sub         = sub,
-                   xlab        = xlab,
-                   ylab        = ylab,
-                   ann         = ann,
-                   axes        = axes,
-                   frame.plot  = frame.plot,
-                   panel.first = panel.first,
-                   panel.last  = panel.last,
-                   asp         = asp,
-                   xgap.axis   = xgap.axis,
-                   ygap.axis   = ygap.axis,
                    pch         = 20,
-                   cex         = 0.1
-                  )
+                   cex         = 0.1,
+                   ...
+                   )
    }
 }
 
@@ -373,8 +344,10 @@ function(cop, sample) {
    s_cop_y <- ss$x[cop$y * (size + 1)]
 
    me  <- list(
-               x   = s_cop_x,
-               y   = s_cop_y,
+               sample = list(
+                              x   = s_cop_x,
+                              y   = s_cop_y
+                              ),
                lx  = length(s_cop_x),
                ly  = length(s_cop_y),
                ss  = ss,
