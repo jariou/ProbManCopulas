@@ -1,4 +1,206 @@
 ##################################################
+# Marginal distributionn Models                  #
+##################################################
+
+##################################################
+# Exponential Distribution with Scale parameter  #
+##################################################
+Exponential <-
+function(params) {
+   pdf <- function(x) {
+                       dexp(x, rate = 1 / params)
+                       }
+   cdf <- function(x) {
+                       pexp(x, rate = 1 / params)
+                       }
+   quantile <- function(p) {
+                            qexp(p, rate = 1 / params)
+                            }
+   rand <- function(n) {
+                        rexp(n, rate= 1 / params)
+                        }
+   param_names <- c("Theta")
+   param_desc  <- c("Scale parameter")
+
+   me <- list(
+              Pdf        = pdf,
+              Cdf        = cdf,
+              Quantile   = quantile,
+              Roll       = rand,
+              ParamNames = param_names,
+              ParamDesc  = param_desc
+              )
+   class(me) <- "RV-Model"
+   return(me)
+}
+
+##################################################
+# Degenerate Distribution with parameter         #
+##################################################
+Degenerate <-
+function(params) {
+   pdf <- function(x) {
+                       dexp(x, rate = 1 / params)
+                       }
+   cdf <- function(x) {
+                       pexp(x, rate = 1 / params)
+                       }
+   quantile <- function(p) {
+                            qexp(p, rate = 1 / params)
+                            }
+   rand <- function(n) {
+                        rep(params, n)
+                        }
+   param_names <- c("X0")
+   param_desc  <- c("The single possible realized value")
+
+   me <- list(
+              Pdf        = pdf,
+              Cdf        = cdf,
+              Quantile   = quantile,
+              Roll       = rand,
+              ParamNames = param_names,
+              ParamDesc  = param_desc
+              )
+
+   class(me) <- "RV-Model"
+   return(me)
+}
+
+##################################################
+# Uniform Distribution defaults to [0, 1]        #
+##################################################
+Uniform <-
+function(params) {
+   pdf <- function(x) {
+                       dunif(x, params[1], params[2])
+                       }
+   cdf <- function(x) {
+                       punif(x, params[1], params[2])
+                       }
+   quantile <- function(p) {
+                            qunif(p, params[1], params[2])
+                            }
+   rand <- function(n) {
+                        runif(n, params[1], params[2])
+                        }
+
+   param_names <- c("Min", "Max")
+   param_desc  <- c("Minimum possible value", "Maximum possible value")
+
+   me <- list(
+              Pdf        = pdf,
+              Cdf        = cdf,
+              Quantile   = quantile,
+              Roll       = rand,
+              ParamNames = param_names,
+              ParamDesc  = param_desc
+              )
+   class(me) <- "RV-Model"
+   return(me)
+}
+
+
+##################################################
+# Pareto Distribution                            #
+##################################################
+Pareto <-
+function(params) {
+   alpha <- params[2]
+   theta <- params[1]
+
+   pdf <- function(x) {
+                       alpha / theta / (1 + x / theta)^ (alpha + 1)
+                       }
+
+   cdf <- function(x) {
+                       1 - (1 / (x / theta + 1))^alpha
+                       }
+
+   quantile <- function(p) {
+                            theta * (
+                                     1 / (
+                                          (1 - p)^ (1 / alpha)
+                                          ) 
+                                     - 1
+                                    )
+                            }
+
+   rand <- function(n) {
+                        theta * (
+                                 1 / (
+                                      (1 - runif(n))^ (1 / alpha)
+                                      )
+                                 - 1
+                                 )
+                        }
+
+   param_names <- c("Theta", "Alpha")
+   param_desc  <- c("Scale parameter", "Shape parameter")
+
+   me <- list(
+              Pdf        = pdf,
+              Cdf        = cdf,
+              Quantile   = quantile,
+              Roll       = rand,
+              ParamNames = param_names,
+              ParamDesc  = param_desc
+              )
+   class(me) <- "RV-Model"
+   return(me)
+}
+
+##################################################
+# Inverse Pareto Distribution                    #
+##################################################
+InversePareto <-
+function(params) {
+   tau <- params[2]
+   theta <- params[1]
+
+   pdf <- function(x) {
+                       tau / theta / (1 + x / theta)^ (alpha + 1)
+                       }
+
+   cdf <- function(x) {
+                       1 - (1 / (x / theta + 1))^alpha
+                       }
+
+   quantile <- function(p) {
+                            theta * (
+                                     1 / (
+                                          (1 - p)^ (1 / alpha)
+                                          ) 
+                                     - 1
+                                    )
+                            }
+
+   rand <- function(n) {
+                        theta * (
+                                 1 / (
+                                      (1 - runif(n))^ (1 / alpha)
+                                      )
+                                 - 1
+                                 )
+                        }
+
+   param_names <- c("Theta", "Alpha")
+   param_desc  <- c("Scale parameter", "Shape parameter")
+
+   me <- list(
+              Pdf        = pdf,
+              Cdf        = cdf,
+              Quantile   = quantile,
+              Roll       = rand,
+              ParamNames = param_names,
+              ParamDesc  = param_desc
+              )
+   class(me) <- "RV-Model"
+   return(me)
+}
+
+
+##################################################
 # Simple simulation models                       #
 ##################################################
 ball <-
@@ -10,8 +212,8 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
                         )
 
    theta <- 2 * (from + runif(n) * (to - from)) * pi
-   x_pos     <- radius_pos * cos(theta)
-   y_pos     <- radius_pos * sin(theta)
+   x_pos <- radius_pos * cos(theta)
+   y_pos <- radius_pos * sin(theta)
 
    me <- list(
            x = x_pos + x0,
@@ -21,6 +223,30 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
    class(me) <- append(class(me), "jointSample")
    return(me)
 }
+
+##################################################
+# CommonScale Factor Dependent Model             #
+##################################################
+common_scale <-
+function(
+         n,
+         scale_model   = Exponential(100),
+         margin_models = list(
+                                x = Exponential(100),
+                                y = Exponential(100)
+                                )
+         ) {
+   scales <- scale_model$Roll(n)
+   tmp <- lapply(margin_models, "[[", "Roll")
+   me <- list(
+              x = tmp$x(n) * scales,
+              y = tmp$y(n) * scales
+              )
+
+   class(me) <- append(class(me), "jointSample")
+   return(me)
+}
+
 
 ##################################################
 circle <-
@@ -138,8 +364,8 @@ function(n,
                           mouth_radius,
                           0,
                           -0.8,
-                          mouthStart,
-                          mouthEnd
+                          mouth_start,
+                          mouth_end
                           )
    me     <- list(
                   x = c(main$x, left_eye$x, right_eye$x, mouth$x),
@@ -155,9 +381,6 @@ function(n,
 copula <-
 function(joint_sample) {
    size <- length(joint_sample$x)
-   print(paste("----> size is ", size))
-
-   str(joint_sample)
    tmp_0 <- lapply(joint_sample, rank)
    tmp_1 <- lapply(
                    tmp_0,
@@ -287,9 +510,14 @@ function(
 
       # Plain X-Y plot of the sample
       plot.default(
-                   x           = x,
-                   pch         = 20,
-                   cex         = 0.1,
+                   x    = x,
+                   pch  = 20,
+                   cex  = 0.1,
+                   tcl  = 0,
+                   xlab = "",
+                   ylab = "",
+                   xaxt = "n",
+                   yaxt = 'n',
                    ...
                   )
 
@@ -297,23 +525,39 @@ function(
       tmp_y <- my_cdf(x$y)
       plot(
            list(x = tmp_y$y, y = tmp_y$x),
-           pch = 20,
-           cex = 0.1,
-           ...
+           pch  = 20,
+           cex  = 0.1,
+           tcl  = 0,
+           xlab = "",
+           ylab = "",
+           xaxt = "n",
+           yaxt = 'n',
+            ...
            )
 
       # Plot CDF of X marginal
       plot(
            my_cdf(x$x),
-           pch = 20,
-           cex = 0.1,
+           pch  = 20,
+           cex  = 0.1,
+           tcl  = 0,
+           xlab = "",
+           ylab = "",
+           xaxt = "n",
+           yaxt = 'n',
            ...
            )
 
-      print("Done with the 3 easy ones")
-
       # Plot of the copula
-      plot(copula(x))
+      plot(
+            copula(x),
+            xaxt = "n",
+            xlab = "",
+            ylab = "",
+            xaxt = "n",
+            yaxt = 'n',
+            ...
+            )
    }
    else {
       plot.default(
@@ -344,14 +588,8 @@ function(cop, sample) {
    s_cop_y <- ss$x[cop$y * (size + 1)]
 
    me  <- list(
-               sample = list(
-                              x   = s_cop_x,
-                              y   = s_cop_y
-                              ),
-               lx  = length(s_cop_x),
-               ly  = length(s_cop_y),
-               ss  = ss,
-               cop = cop
+               x   = s_cop_x,
+               y   = s_cop_y
                )
 
    class(me) <- append(class(me), "jointSample")
