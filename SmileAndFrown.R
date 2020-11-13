@@ -155,7 +155,7 @@ function(n,
 copula <-
 function(joint_sample) {
    size <- length(joint_sample$x)
-   print(paste("----> size is ",size))
+   print(paste("----> size is ", size))
 
    str(joint_sample)
    tmp_0 <- lapply(joint_sample, rank)
