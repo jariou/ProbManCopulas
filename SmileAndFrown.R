@@ -1,3 +1,18 @@
+#######################################################################################
+# See Metalog in R                                                                    #
+# https://cran.r-project.org/web/packages/rmetalog/vignettes/rmetalog-vignette.html   #
+#######################################################################################
+
+# Making Your First R Package
+# https://tinyheero.github.io/jekyll/update/2015/07/26/making-your-first-R-package.html
+
+# R Packages: A Beginner's Guide
+# https://www.datacamp.com/community/tutorials/r-packages-guide
+
+# R package primer
+# Connecting to other packages
+# https://kbroman.org/pkg_primer/pages/depends.html
+
 ##################################################
 # Marginal distributionn Models                  #
 ##################################################
