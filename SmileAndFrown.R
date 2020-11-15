@@ -21,6 +21,22 @@
 
 
 #-----------------------------------
+# Mixture of Copulas
+CopMix <-
+function(cop1, cop2, w1 = 0.5) {
+  sample_size <- length(cop1$x)
+  sample_ids  <- runif(sample_size)
+  cop1_reps   <- sample_ids < w1
+  cop2_reps   <- !cop1_reps
+
+  me <- list(
+             x = c(cop1$x[cop1_reps], cop2$x[cop2_reps]),
+             y = c(cop1$y[cop1_reps], cop2$y[cop2_reps])
+             )
+  copula(me)
+}
+
+#-----------------------------------
 # Perfect positive Dependency Copula
 One <-
 function(n) {
