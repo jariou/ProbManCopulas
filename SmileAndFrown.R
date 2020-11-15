@@ -15,13 +15,12 @@
 # Connecting to other packages
 # https://kbroman.org/pkg_primer/pages/depends.html
 
-##################################################
-# Marginal distributionn Models                  #
-##################################################
+#------------------------------
+# Marginal distributionn Models
+#------------------------------
 
-##################################################
-# Exponential Distribution with Scale parameter  #
-##################################################
+#-------------------------------------------------
+# Exponential Distribution with Scale parameter
 Exponential <-
 function(params) {
   pdf <- function(x) {
@@ -51,9 +50,8 @@ function(params) {
   return(me)
 }
 
-##################################################
-# Degenerate Distribution with parameter         #
-##################################################
+#----------------------------------------
+# Degenerate Distribution with parameter
 Degenerate <-
 function(params) {
   pdf <- function(x) {
@@ -83,9 +81,8 @@ function(params) {
   return(me)
 }
 
-##################################################
-# Uniform Distribution defaults to [0, 1]        #
-##################################################
+#----------------------------------------
+# Uniform Distribution defaults to [0, 1]
 Uniform <-
 function(params) {
   pdf <- function(x) {
@@ -116,9 +113,8 @@ function(params) {
   return(me)
 }
 
-##################################################
-# Pareto Distribution                            #
-##################################################
+#--------------------
+# Pareto Distribution
 Pareto <-
 function(params) {
   alpha <- params[2]
@@ -162,9 +158,8 @@ function(params) {
   return(me)
 }
 
-##################################################
-# Inverse Pareto Distribution                    #
-##################################################
+#----------------------------
+# Inverse Pareto Distribution
 InversePareto <-
 function(params) {
   tau <- params[2]
@@ -208,9 +203,8 @@ function(params) {
   return(me)
 }
 
-##################################################
-# Simple simulation models                       #
-##################################################
+#-------------------------
+# Simple simulation models
 ball <-
 function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
   radius_pos  <- sqrt(
@@ -231,9 +225,8 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
   return(me)
 }
 
-##################################################
-# CommonScale Factor Dependent Model             #
-##################################################
+#------------------------------------
+# Common Scale Factor Dependent Model
 common_scale <-
 function(
          n,
@@ -253,7 +246,8 @@ function(
   return(me)
 }
 
-##################################################
+#---------------------------------
+# Uniform distribution on a circle
 circle <-
 function(n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) {
   theta <- 2 * (from + runif(n) * (to - from)) * pi
@@ -268,7 +262,8 @@ function(n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) {
   return(me)
 }
 
-##################################################
+#-------------------
+# Uniform  distribution on a square
 square <-
 function(n) {
   me <- list(
@@ -279,10 +274,11 @@ function(n) {
   return(me)
 }
 
-##################################################
+#---------------------------------
+# Uniform distribution on a triangle
 triangle <-
 function(n, rev = F) {
-  y  <- runif(n)
+  y  <- 1 - sqrt(runif(n))
 
   me <- list(
              x = y / 2 + runif(n) * (1 - y),
@@ -292,7 +288,8 @@ function(n, rev = F) {
   return(me)
 }
 
-##################################################
+#--------------------------------
+# Distribution uniform on a smile
 smile <-
 function(
         n,
@@ -334,7 +331,8 @@ function(
   return(me)
 }
 
-##################################################
+#--------------------------------
+# Uniform distribution on a frown
 frown <-
 function(
          n,
@@ -375,7 +373,8 @@ function(
   return(me)
 }
 
-##################################################
+#----------------------------------------------
+# Generate empirical copula from a joint sample
 copula <-
 function(joint_sample) {
   size  <- length(joint_sample$x)
@@ -396,16 +395,17 @@ function(joint_sample) {
   return(me)
 }
 
-##################################################
+#----------------------------------------------
+# Dump all the functions from a search location
 dump.functions <-
-function(file) {
-  dump(functions(), file)
+function(file, search_loc = 1) {
+  dump(functions(search_loc), file)
 }
 
-##################################################
+#----------------------------------------------
 # Return a list of functions
 functions <-
-function() {
+function(search_loc = 1) {
   objs  <- objects(envir = globalenv())
   objs[
        unlist(
@@ -425,7 +425,7 @@ function() {
        ]
 }
 
-##################################################
+#-----------------------------
 # List all jointSample objects
 joint_samples <-
 function() {
@@ -448,8 +448,8 @@ function() {
       ]
 }
 
-##################################################
-# Simpleimplementation of empirical cdf
+#---------------------------------------
+# Simple implementation of empirical cdf
 my_cdf <-
 function(x) {
   sx    <- sort(x)
@@ -467,7 +467,7 @@ function(x) {
        )
 }
 
-##################################################
+#-------------------------------------
 # Simulate a joint normal distribution
 normal <-
 function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
@@ -488,7 +488,7 @@ function(n, r = 1, hole = 0, x0 = 0, y0 = 0, from = 0, to = 1) {
   return(me)
 }
 
-##################################################
+#--------------------
 # Plot a joint sample
 plot.jointSample <-
 function(
@@ -567,7 +567,7 @@ function(
   }
 }
 
-##################################################
+#--------------------------------------
 # Print method for the jointSample type
 print.jointSample <-
 function(x, ...) {
@@ -576,7 +576,7 @@ function(x, ...) {
   invisible(x)
 }
 
-##################################################
+#------------------------
 # Simulate using a copula
 rand_copula <-
 function(cop, sample) {
