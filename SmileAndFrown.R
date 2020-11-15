@@ -20,6 +20,29 @@
 #------------------------------
 
 
+# ----------------------------
+# Make a movie from going from one plot to another one
+Movie <-
+function(start_point, end_point, steps) {
+  x_start  = start_point$x
+  y_start  = start_point$y
+  x_end    = end_point$x
+  y_end    = end_point$y
+  x_diff   = end_point$x - start_point$x
+  y_diff   = end_point$y - start_point$y
+
+
+  for(i in 0:steps) {
+    plot.jointSample(
+                     list(
+                          x = x_start + i / steps * x_diff,
+                          y = y_start + i / steps * y_diff
+                          )
+                    ) 
+  }
+
+}
+
 #-----------------------------------
 # Mixture of Copulas
 CopMix <-
