@@ -19,6 +19,33 @@
 # Marginal distributionn Models
 #------------------------------
 
+
+#-----------------------------------
+# Perfect positive Dependency Copula
+One <-
+function(n) {
+  me <- list(
+             x = (1:n) / (n + 1),
+             y = (1:n) / (n + 1)
+            )
+  class(me) <- append(class(me), "jointSample")
+  class(me) <- append(class(me), "copula")
+  return(me)
+}
+
+#-----------------------------------
+# Perfect negative Dependency Copula
+MinusOne <-
+function(n) {
+  me <- list(
+             x = (1:n) / (n + 1),
+             y = (n:1) / (n + 1)
+            )
+  class(me) <- append(class(me), "jointSample")
+  class(me) <- append(class(me), "copula")
+  return(me)
+}
+
 #-------------------------------------------------
 # Exponential Distribution with Scale parameter
 Exponential <-
