@@ -19,8 +19,14 @@
 # Marginal distributionn Models
 #------------------------------
 
+#-----------------------------------------------------
+# Make a movie from going from one plot to another one
+CopMovie <-
+function(sample) {
+  Movie(sample, copula(sample), steps = 100)
+}
 
-# ----------------------------
+#-----------------------------------------------------
 # Make a movie from going from one plot to another one
 Movie <-
 function(start_point, end_point, steps) {
@@ -45,18 +51,24 @@ function(start_point, end_point, steps) {
 
 #-----------------------------------
 # Mixture of Copulas
-CopMix <-
-function(cop1, cop2, w1 = 0.5) {
-  sample_size <- length(cop1$x)
-  sample_ids  <- runif(sample_size)
-  cop1_reps   <- sample_ids < w1
-  cop2_reps   <- !cop1_reps
+mixture <-
+function(sample1, sample2, w1 = 0.5) {
+  sample_size  <- length(sample1$x)
+  sample_ids   <- runif(sample_size)
+  sample1_reps <- sample_ids < w1
+  sample2_reps <- !sample1_reps
 
   me <- list(
-             x = c(cop1$x[cop1_reps], cop2$x[cop2_reps]),
-             y = c(cop1$y[cop1_reps], cop2$y[cop2_reps])
+             x = c(
+                   sample1$x[sample1_reps], 
+                   sample2$x[sample2_reps]
+                   ),
+             y = c(
+                   sample1$y[sample1_reps], 
+                   sample2$y[sample2_reps]
+                   )
              )
-  copula(me)
+  # copula(me)
 }
 
 #-----------------------------------
@@ -343,12 +355,12 @@ function(n) {
 #---------------------------------
 # Uniform distribution on a triangle
 triangle <-
-function(n, rev = F) {
+function(n, x0 = 0, y0 = 0) {
   y  <- 1 - sqrt(runif(n))
 
   me <- list(
-             x = y / 2 + runif(n) * (1 - y),
-             y = y
+             x = x0 + y / 2 + runif(n) * (1 - y),
+             y = y0 + y
              )
   class(me) <- append(class(me), "jointSample")
   return(me)
@@ -359,6 +371,8 @@ function(n, rev = F) {
 smile <-
 function(
         n,
+        x0 = 0,
+        y0 = 0,
         main_radius  = 1,
         eye_radius   = 0.25,
         mouth_radius = 0.7,
@@ -390,8 +404,8 @@ function(
                         )
 
   me  <-   list(
-                x = c(main$x, left_eye$x, right_eye$x, mouth$x),
-                y = c(main$y, left_eye$y, right_eye$y, mouth$y)
+                x = x0 + c(main$x, left_eye$x, right_eye$x, mouth$x),
+                y = y0 + c(main$y, left_eye$y, right_eye$y, mouth$y)
                 )
   class(me) <- append(class(me), "jointSample")
   return(me)
@@ -402,6 +416,8 @@ function(
 frown <-
 function(
          n,
+         x0 = 0,
+         y0 = 0,
          main_radius  = 1,
          eye_radius   = 0.25,
          mouth_radius = 0.7,
@@ -432,8 +448,8 @@ function(
                          mouth_end
                          )
   me     <- list(
-                 x = c(main$x, left_eye$x, right_eye$x, mouth$x),
-                 y = c(main$y, left_eye$y, right_eye$y, mouth$y)
+                 x = x0 + c(main$x, left_eye$x, right_eye$x, mouth$x),
+                 y = y0 + c(main$y, left_eye$y, right_eye$y, mouth$y)
                  )
   class(me) <- append(class(me), "jointSample")
   return(me)
@@ -448,13 +464,18 @@ function(joint_sample) {
   tmp_1 <- lapply(
                   tmp_0,
                   "[",
-                  lapply(joint_sample, order)$x
+                  order(joint_sample$x)
                   )
   me <- lapply(
                tmp_1,
                function(t) {
                             t / (size + 1)
                             }
+               )
+  me <- lapply(
+               me,
+               "[",
+               rank(joint_sample$x)
                )
   class(me) <- append(class(me), "jointSample")
   class(me) <- append(class(me), "copula")
