@@ -340,7 +340,7 @@ function(n, r = 1, x0 = 0, y0 = 0, from = 0, to = 1) {
   return(me)
 }
 
-#-------------------
+#----------------------------------
 # Uniform  distribution on a square
 square <-
 function(n) {
